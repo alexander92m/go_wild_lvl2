@@ -24,37 +24,35 @@ func checker(s string) error{
 
 // "a4bc2d5e" => "aaaabccddddde"
 func Unpack(s string) (string, error) {
+	fmt.Println("")
 	err := checker(s)
 	if err != nil {
 		return s, nil
 	}
+
 	s2 := []rune(s)
 	temp := 0
 	s3 := make([]rune, 0)
-	for i := range s2 {
-		
-		if isSlash(s2[i]) {
-			
+	for i := 0; i < len(s2); i++ {
+		if isSlash(s2[i]) {	
+			if isSlash(s2[i + 1]) {
+				s3 = append(s3, s2[i + 1])
+			}
 			if i + 2 < len(s2) {
 				if isDigit(s2[i + 2]) {
-					fmt.Println("ch")
 					temp = int(s2[i + 2] - rune(48))
-					for j := 0; j < temp; j++ {
-						s3 = append(s3, s2[i + 1])
-						// fmt.Println("slash")						
+					for j := 1; j < temp; j++ {
+						s3 = append(s3, s2[i + 1])					
 					}
+					i = i + 2
 				}
 			}
-			
 		} else if isDigit(s2[i]) {
-			// fmt.Println("digit")
 			temp = int(s2[i] - rune(48))
-			for j := 0; j < temp; j++ {
-
+			for j := 1; j < temp; j++ {
 				s3 = append(s3, s2[i - 1])
 			}
 		} else {
-			// fmt.Println("other")
 			s3 = append(s3, s2[i])
 		}
 		
