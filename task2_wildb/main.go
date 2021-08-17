@@ -21,6 +21,6 @@ import (
 func main() {
 	// fmt.Println(Unpack(`a3bc2d2e1`))
 	// Unpack("22")
-	fmt.Println(Unpack(`qwe\\500`))
+	fmt.Println(Unpack(`e\\3a`))
 }
 
