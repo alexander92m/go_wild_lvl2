@@ -9,6 +9,7 @@ import (
 	"bufio"
 	"io"
 	"sort"
+	"strings"
 )
 
 //struct of agrs(Flags, FileNames)
@@ -27,10 +28,17 @@ func NormalSort(strs []string) {
 }
 
 //parse flags from args
-func ParseFlags() {
-	for i := 0; i < len(os.Args); i++ {
-		
+func ParseFlags() Arguments {
+	var flags Arguments
+	for i := 1; i < len(os.Args); i++ {
+		if strings.HasPrefix(os.Args[i], "-") {
+
+		} else {
+			flags.FileNames = append(flags.FileNames, os.Args[i])
+		}
 	}
+
+	return flags
 
 }
 
@@ -56,12 +64,14 @@ func CreateArray() []string{
 		strs = append(strs, s)
 		
 	}
+	//temp output
 	for i := range strs {
 		fmt.Printf("|%v|\n", strs[i])
 	}
 	return strs
 
 }
+
 
 //output strings
 func Output_strings(strs []string) {
@@ -73,6 +83,8 @@ func main(){
 	for i := 0; i < len(os.Args); i++ {
 		fmt.Printf("i=%d, args i= %v, type= %T\n", i, os.Args[i], os.Args[i])
 	}
+	flags := ParseFlags()
+	fmt.Println("|", flags, "|")
 	strs := CreateArray()
 
 	Output_strings(strs)
