@@ -129,12 +129,26 @@ func NormalSort(strs []string) {
 	sort.Strings(strs)
 }
 
+//undouble sorting
+func uSort(strs []string) []string {
+	for i := 0; i < len(strs); i++ {
+		for j := i + 1; j < len(strs); j++ {
+			if i < j && strs[i] == strs[j] {
+				strs = append(strs[ :j], strs[j + 1: ]...)
+			}
+		}
+	}
+	return strs
+}
 //output strings
 func Output_strings(strs []string, arg Arguments) {
 
 	NormalSort(strs)
 	if arg.r {
 		strs = rSort(strs)
+	}
+	if arg.u {
+		strs = uSort(strs)
 	}
 	for i := range strs {
 		fmt.Printf("i=%d, |%v|\n", i, strs[i])
@@ -144,7 +158,10 @@ func Output_strings(strs []string, arg Arguments) {
 //main
 func main(){
 	arg := ParseFlags()
+
+	fmt.Printf("%v, %T\n", arg, arg)
 	strs := CreateArray(arg)
 	Output_strings(strs, arg)
+	// fmt.Println(strs)
 	
 }
