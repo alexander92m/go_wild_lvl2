@@ -74,6 +74,7 @@ func CreateArray(arg Arguments) []string{
 		file, errOpen := os.Open(arg.Files[j])
 		if errOpen != nil {
 			fmt.Println("Error of open")
+			os.Exit(0)
 		}
 		rd := bufio.NewReader(file)
 		for i := 0; i < 2; {
@@ -140,15 +141,27 @@ func uSort(strs []string) []string {
 	}
 	return strs
 }
+
+//compare sorting
+func cSort(arg Arguments) {
+	
+}
 //output strings
-func Output_strings(strs []string, arg Arguments) {
+func Output_strings(strs0 []string, arg Arguments) {
+	strs := strs0
 
 	NormalSort(strs)
+	
 	if arg.r {
 		strs = rSort(strs)
 	}
 	if arg.u {
 		strs = uSort(strs)
+	}
+	
+	if arg.c {
+		cSort(arg)
+		return
 	}
 	for i := range strs {
 		fmt.Printf("i=%d, |%v|\n", i, strs[i])
