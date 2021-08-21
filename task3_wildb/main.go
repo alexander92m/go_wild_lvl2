@@ -8,8 +8,8 @@ import (
 	"os"
 	"bufio"
 	"io"
-	"sort"
 	"strings"
+	"strconv"
 )
 
 //struct of agrs(Flags, Files)
@@ -126,8 +126,14 @@ func rSort(strs []string) []string {
 }
 
 //normal sort
-func NormalSort(strs []string) {
-	sort.Strings(strs)
+func normalSort(strs []string) {
+	for i := len(strs) - 1; i > 0; i-- {
+		for j := 0; j < i; j++ {
+			if strs[j] > strs[j + 1] {
+				strs[j], strs[j + 1] = strs[j + 1], strs[j]
+			}
+		}
+	}
 }
 
 //undouble sorting
@@ -146,12 +152,38 @@ func uSort(strs []string) []string {
 func cSort(arg Arguments) {
 	
 }
+
+//number sorting | 1. есть ли строки с не цифрами, отсортировать их по порядку стандартному. потом отсортировать числовые
+func nSort(strs []string) {
+	for i := len(strs) - 1; i > 0; i-- {
+		for j := 0; j < i; j++ {
+			num, err := strconv.Atoi(strs[j])
+			num2, err2 := strconv.Atoi(strs[j + 1])
+			if err != nil && err2 != nil {
+				if strs[j] > strs[j + 1] {
+					strs[j], strs[j + 1] = strs[j + 1], strs[j]
+				}
+			} else if err == nil && err2 != nil {
+				strs[j], strs[j + 1] = strs[j + 1], strs[j]
+			} else if err == nil && err2 == nil {
+				if num > num2 {
+					strs[j], strs[j + 1] = strs[j + 1], strs[j]
+				}
+			}
+			
+		}
+	}
+}
+
 //output strings
 func Output_strings(strs0 []string, arg Arguments) {
 	strs := strs0
 
-	NormalSort(strs)
-	
+	if arg.n {
+		nSort(strs)
+	} else {
+		normalSort(strs)
+	}
 	if arg.r {
 		strs = rSort(strs)
 	}
@@ -171,7 +203,6 @@ func Output_strings(strs0 []string, arg Arguments) {
 //main
 func main(){
 	arg := ParseFlags()
-
 	fmt.Printf("%v, %T\n", arg, arg)
 	strs := CreateArray(arg)
 	Output_strings(strs, arg)
