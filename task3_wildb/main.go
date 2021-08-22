@@ -178,6 +178,9 @@ func nSort(strs []string) {
 //output strings
 func Output_strings(strs0 []string, arg Arguments) {
 	strs := strs0
+	if arg.k != 0 {
+
+	}
 
 	if arg.n {
 		nSort(strs)
@@ -206,6 +209,5 @@ func main(){
 	fmt.Printf("%v, %T\n", arg, arg)
 	strs := CreateArray(arg)
 	Output_strings(strs, arg)
-	// fmt.Println(strs)
-	
+	// fmt.Println(strs)	
 }
