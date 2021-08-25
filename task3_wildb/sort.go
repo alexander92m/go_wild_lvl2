@@ -11,7 +11,7 @@ import (
 	"strings"
 )
 
-//struct of agrs(Flags, Files)
+//Arguments struct of agrs(Flags, Files)
 type Arguments struct {
 	k			int
 	n			bool
@@ -29,25 +29,21 @@ type Arguments struct {
 func isDigit(c rune) bool {
 	if c >= '0' && c <= '9' {
 		return true
-	} else {
-		return false
 	}
+	return false
 }
-//parse flags from args
+//ParseFlags - parsing flags from args
 func ParseFlags() Arguments {
 	var arg Arguments
 	
 	arg.k = 1
 	for i := 1; i < len(os.Args); i++ {
-		
 		if strings.HasPrefix(os.Args[i], "-") {
-			
 			if strings.Contains(os.Args[i], "k") &&  isDigit(rune(os.Args[i][strings.Index(os.Args[i], "k") + 1])) {
 				arg.k = 0
 				
 				for j := strings.Index(os.Args[i], "k") + 1; j < len(os.Args[i]) && isDigit(rune(os.Args[i][j])); j++ {
 					arg.k = arg.k * 10 + int(os.Args[i][j]) - '0'
-					fmt.Println("privet")
 				}
 			}
 			if strings.Contains(os.Args[i], "n"){
@@ -78,7 +74,7 @@ func ParseFlags() Arguments {
 	return arg
 }
 
-//Create array of strings
+//CreateArray of strings from files
 func CreateArray(arg Arguments) [][]string{
 	strs := make([][]string, 0, 0)
 	for i := range arg.Files {
@@ -134,7 +130,7 @@ func normalSort(strs [][]string, arg Arguments) [][]string {
 	return strs
 }
 
-func	ft_ok(c rune) int {
+func	ftOk(c rune) int {
 	if c == 9 || c == 10 || c == 11 {
 		return 2
 	} else if c == 12 || c == 13 || c == 32 {
@@ -148,7 +144,7 @@ func	ft_ok(c rune) int {
 	}
 }
 
-func	ft_mult(str []rune, i int, num int64, sign int64) int64 {
+func	ftMult(str []rune, i int, num int64, sign int64) int64 {
 	for ;i < len(str) && str[i] >= '0' && str[i] <= '9'; i++ {
 		if (num * sign) < -2147483648 {
 			return 0
@@ -164,7 +160,7 @@ func	ft_mult(str []rune, i int, num int64, sign int64) int64 {
 	return num * sign
 }
 
-func	ft_atoi(str0 string) (int, string) {
+func	ftAtoi(str0 string) (int, string) {
 	var i int
 	var num int64
 	var sign int64
@@ -175,21 +171,21 @@ func	ft_atoi(str0 string) (int, string) {
 		return 0, "invalid string"
 	}
 
-	for str[i] != 0 && (ft_ok(str[i]) < 4) {
-		if (ft_ok(str[i]) == 3) && (ft_ok(str[i + 1]) == 1) {
+	for str[i] != 0 && (ftOk(str[i]) < 4) {
+		if (ftOk(str[i]) == 3) && (ftOk(str[i + 1]) == 1) {
 			if str[i] == '-'{
 				sign = -1
 			}
 		}
-		if ft_ok(str[i]) == 3 && ft_ok(str[i + 1]) != 1 {
+		if ftOk(str[i]) == 3 && ftOk(str[i + 1]) != 1 {
 			break
 		}
 		if isDigit(str[i]) {
-			num = ft_mult(str, i, num, sign)
+			num = ftMult(str, i, num, sign)
 			break
 		}
-		if ft_ok(str[i]) == 2 && ft_ok(str[i + 1]) == 3 {
-			if ft_ok(str[i + 2]) != 1 {
+		if ftOk(str[i]) == 2 && ftOk(str[i + 1]) == 3 {
+			if ftOk(str[i + 2]) != 1 {
 				break
 			}
 		}
@@ -209,9 +205,8 @@ func nSort(strs [][]string, arg Arguments) [][]string {
 			if arg.k < len(strs[j + 1]) {
 				ind2 = arg.k
 			}
-			num, err := ft_atoi(strs[j][ind1])
-			num2, err2 := ft_atoi(strs[j + 1][ind2])
-			fmt.Println(strs[j][ind1], strs[j + 1][ind2], num, num2, err, err2)
+			num, err := ftAtoi(strs[j][ind1])
+			num2, err2 := ftAtoi(strs[j + 1][ind2])
 			if err == "" && err2 == "" {
 				if num > num2 {
 					strs[j], strs[j + 1] = strs[j + 1], strs[j]
@@ -261,7 +256,6 @@ func uSort(s [][]string) [][]string {
 }
 
 func mounthToDigit(s string) int {
-	fmt.Println(s)
 	if len(s) == 3 {
 		s = strings.ToLower(s)
 	} else if len(s) > 3 {
@@ -285,6 +279,7 @@ func mounthToDigit(s string) int {
 	}
 }
 
+//MSort is sorting on mounths
 func MSort(strs [][]string, arg Arguments) [][]string {
 	for i := len(strs) - 1; i > 0; i-- {
 		for j := 0; j < i; j++ {
@@ -318,12 +313,16 @@ func outputStrings(strs0 [][]string, arg Arguments) {
 	if arg.u {
 		strs = uSort(strs)
 	}
-	
 	if arg.M {
 		strs = MSort(strs, arg)
 	}
 	for i := range strs {
-		fmt.Printf("i=%d, |%v|\n", i, strs[i])
+		for j := range strs[i] {
+			if j != 0 {
+				fmt.Print(strs[i][j], " ")
+			}
+		}
+		fmt.Println()
 	}
 }
 	
@@ -331,7 +330,6 @@ func outputStrings(strs0 [][]string, arg Arguments) {
 func main() {
 	arg := ParseFlags()
 	strs := CreateArray(arg)
-	fmt.Printf("\n%v, %T \n %v, %T\n\n", arg, arg, strs,  strs)
 	outputStrings(strs, arg)
 	
 }
