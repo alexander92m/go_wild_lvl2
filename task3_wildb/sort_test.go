@@ -1,13 +1,17 @@
 package main
 
-import "fmt"
+import (
+	"fmt"
+	"testing"
+	"os"
+)
 
 type tester struct {
 	com 	string
 	files 	string
 }
 
-func main() {
+func Testmain(m *testing.M) {
 	input := []tester{
 		{
 		"-nk2",
@@ -17,7 +21,10 @@ func main() {
 		"text",
 		},
 	}
+	
 	for _, testCase := range input {
-		main(testtestCase.com, tetestCase.files)
+		flag.Parse("text")
+		os.Exit(m.Run())
+		fmt.Println(testCase)
 	}
 }
