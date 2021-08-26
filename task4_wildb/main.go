@@ -21,10 +21,7 @@ import (
 )
 
 func main() {
-	fmt.Println("begin")
-	s := []string{"фыв", "выф", "листок", "слиток", "меч", "чем", "кот", "ток"}
-	fmt.Println(s)
-	fmt.Println(Anagrams(s))
-
-	fmt.Println("end")
+	// s2 := []string{"пятак", "пятка", "тяпка"}
+	s1 := []string{"ГВОЗДЬ", "пЯтак", "пятка", "тяпка", "фыв", "выф", "листок", "слиток", "меч", "чем", "кот", "ток"}
+	fmt.Println(Anagrams(s1), s1)
 }
