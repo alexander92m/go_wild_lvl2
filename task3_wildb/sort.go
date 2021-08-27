@@ -70,6 +70,7 @@ func ParseFlags() Arguments {
 		} else {
 			arg.Files = append(arg.Files, os.Args[i])
 		}
+		
 	}
 	return arg
 }
@@ -77,37 +78,54 @@ func ParseFlags() Arguments {
 //CreateArray of strings from files
 func CreateArray(arg Arguments) [][]string{
 	strs := make([][]string, 0, 0)
-	for i := range arg.Files {
-		file,  errOpen := os.Open(arg.Files[i])
-		if errOpen != nil {
-			fmt.Println("Error of open", arg.Files[i])
-			os.Exit(0)
-		}
-		rd := bufio.NewReader(file)
-		for j := 0; j < 2; {
-			s, errRead := rd.ReadString('\n')
+	if len(arg.Files) == 0 {
+		sc := bufio.NewScanner(os.Stdin)
+		for sc.Scan() {
+			s := sc.Text()
 			var s2 []string
-			if errRead != nil && errRead != io.EOF {
-				fmt.Println("Error of read string")
-			} else if errRead == io.EOF {
-				j = 2
-				if s != "\n" {
-					
-					s2 = strings.Split(s, " ")
-				}
-			} else {
-				s = s[0:len(s) - 1]
-				s2 = strings.Split(s, " ")
-			}
+			// s = s[0:len(s) - 1]
+			s2 = strings.Split(s, " ")
 			ss := make([]string, 0, 0)
-			ss = append(ss, arg.Files[i])
+			ss = append(ss, "basic input")
 			for k := range s2 {
 				ss = append(ss, s2[k])
 			}
 			strs = append(strs, ss)
 		}
-		file.Close()
+	} else {
+		for i := range arg.Files {
+			file,  errOpen := os.Open(arg.Files[i])
+			if errOpen != nil {
+				fmt.Println("Error of open", arg.Files[i])
+				os.Exit(0)
+			}
+			rd := bufio.NewReader(file)
+			for j := 0; j < 2; {
+				s, errRead := rd.ReadString('\n')
+				var s2 []string
+				if errRead != nil && errRead != io.EOF {
+					fmt.Println("Error of read string")
+				} else if errRead == io.EOF {
+					j = 2
+					if s != "\n" {
+						
+						s2 = strings.Split(s, " ")
+					}
+				} else {
+					s = s[0:len(s) - 1]
+					s2 = strings.Split(s, " ")
+				}
+				ss := make([]string, 0, 0)
+				ss = append(ss, arg.Files[i])
+				for k := range s2 {
+					ss = append(ss, s2[k])
+				}
+				strs = append(strs, ss)
+			}
+			file.Close()
+		}
 	}
+	
 	return strs
 }
 
