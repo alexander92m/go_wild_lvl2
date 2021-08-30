@@ -71,7 +71,6 @@ func parseFlags() argFlag {
 				} else {
 					flags.B, _ = strconv.Atoi(os.Args[i][2:])
 				}
-				flags.i = true
 			}
 			if strings.Contains(os.Args[i], "C") {
 				ind := strings.Index(os.Args[i], "C")
@@ -81,8 +80,9 @@ func parseFlags() argFlag {
 					
 				} else {
 					flags.C, _ = strconv.Atoi(os.Args[i][2:])
+					flags.A = flags.C
+					flags.B = flags.C
 				}
-				flags.i = true
 			}
 		} else if cnt == 0 {
 			flags.word = os.Args[i]
@@ -152,8 +152,8 @@ func createArr(arg argFlag) [][]string{
 	return strs
 }
 
-func arrarrContain(ss []string, arg argFlag) bool {
-	for i := range ss {
+func arrContain(ss []string, arg argFlag) bool {
+	for i := 1; i < len(ss); i++ {
 		if strings.Contains(ss[i], arg.word) {
 			return true
 		}
@@ -164,28 +164,63 @@ func arrarrContain(ss []string, arg argFlag) bool {
 func reArray(ss0 [][]string, arg argFlag) [][]string {
 	ss := make([][]string, 0, 0)
 	ss2 := make([][]string, 0, 0)
+	var status string = "clean"
 	
 	ss = append(ss, ss0...)
 	for i := range ss {
-		match := arrarrContain(ss[i], arg)
+		match := arrContain(ss[i], arg)
 		if match {
-			// if len(ss2) != 0 && ss2[len(ss2) - 1] {
-
-			// }
+			if status == "minor+" {
+				ss2 = append(ss2, []string{"..", "--"})
+				status = ".."
+			}
 			ss2 = append(ss2, ss[i])
+			status = "major"
+			
+			
 			match2 := false
+			
+			for k := 1; !match2 && k <= arg.B && i - k >= 0; k++ {
+				for l := 1; l < len(ss[i - k]); l++ {
+					if strings.Contains(ss[i - k][l], arg.word) {
+
+						match2 = true
+						break
+					}
+				}
+				if !match2 {
+					s := [][]string{}
+					s = append(s, ss2[len(ss2) - k: ]...)
+					ss2 = append(ss2[0: len(ss2) - k], ss[i - k])
+					ss2 = append(ss2, s...)
+					if k == arg.A {
+						status = "minor+"
+					} else {
+						status = "minor-"
+					}
+				}
+			}
+			match2 = false
 			for k := 1; !match2 && k <= arg.A && k + i < len(ss); k++ {
-				match2 = false
+				
 				for l := 1; l < len(ss[i + k]); l++ {
 					if strings.Contains(ss[i + k][l], arg.word) {
+
 						match2 = true
 						break
 					}
 				}
 				if !match2 {
 					ss2 = append(ss2, ss[i + k])
+					
+					if k == arg.A {
+						status = "minor+"
+					} else {
+						status = "minor-"
+					}
 				}
 			}
+			
 		}
 		
 	}
@@ -205,6 +240,8 @@ func outputStrings(strs [][]string, arg argFlag) {
 	}
 }
 
+
+
 func main() {
 	if len(os.Args) < 3 {
 		fmt.Println("некорретные входные данные\n КАК?: grep [-civFn] [-A num] [-B num] [-C[num] [filter key] [file ...]\n-A - `after` печатать +N строк после совпадения\n-B - `before` печатать +N строк до совпадения\n-C - `context` (A+B) печатать ±N строк вокруг совпадения\n-c - `count` (количество строк)\n-i - `ignore-case` (игнорировать регистр)\n-v - `invert` (вместо совпадения, исключать)\n-F - `fixed`, точное совпадение со строкой, не паттерн\n-n - `line num`, печатать номер строки")
@@ -213,8 +250,26 @@ func main() {
 	arg := parseFlags()
 	fmt.Println(arg)
 	strs := createArr(arg)
-	strs2 := reArray(strs, arg)
+	if arg.i {
+		arg.word = strings.ToLower(arg.word)
+		for i := range strs {
+			for j := 1; j < len(strs[i]); j++ {
+				strs[i][j] = strings.ToLower(strs[i][j])
+			}
+		}
+	}
+	if arg.c {
+		cnt := 0
+		for i := range strs {
+			if arrContain(strs[i], arg) {
+				cnt++
+			}
+		}
+		fmt.Println(cnt)
+	} else {
+		strs2 := reArray(strs, arg)
+		// outputStrings(strs, arg)
+		outputStrings(strs2, arg)
+	}
 	
-	outputStrings(strs, arg)
-	outputStrings(strs2, arg)
 }
