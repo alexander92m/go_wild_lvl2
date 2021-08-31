@@ -227,6 +227,25 @@ func reArray(ss0 [][]string, arg argFlag) [][]string {
 	return ss2
 }
 
+func reArrayV(ss0 [][]string, arg argFlag) [][]string {
+	ss := make([][]string, 0, 0)
+	
+	ss = append(ss, ss0...)
+	for i := 0; i < len(ss); i++ {
+		match := arrContain(ss[i], arg)
+		if match {
+			if i == len(ss) - 1 {
+
+			} else {
+				ss = append(ss[:i], ss[i + 1:]...)
+			}
+			
+		}
+	}
+	return ss
+}
+
+
 func outputStrings(strs [][]string, arg argFlag) {
 		
 	fmt.Println("len(strs)", len(strs))
@@ -250,6 +269,7 @@ func main() {
 	arg := parseFlags()
 	fmt.Println(arg)
 	strs := createArr(arg)
+	strs2 := [][]string{}
 	if arg.i {
 		arg.word = strings.ToLower(arg.word)
 		for i := range strs {
@@ -257,6 +277,12 @@ func main() {
 				strs[i][j] = strings.ToLower(strs[i][j])
 			}
 		}
+	}
+	
+	if !arg.v {
+		strs2 = reArray(strs, arg)
+	} else {
+		strs2 = reArrayV(strs, arg)
 	}
 	if arg.c {
 		cnt := 0
@@ -267,8 +293,6 @@ func main() {
 		}
 		fmt.Println(cnt)
 	} else {
-		strs2 := reArray(strs, arg)
-		// outputStrings(strs, arg)
 		outputStrings(strs2, arg)
 	}
 	
