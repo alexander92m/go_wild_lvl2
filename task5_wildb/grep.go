@@ -2,25 +2,25 @@
 package main
 
 import (
+	"bufio"
 	"fmt"
+	"io"
 	"os"
 	"strconv"
 	"strings"
-	"bufio"
-	"io"
 )
 
-type  argFlag struct {
-	A		int
-	B		int
-	C		int
-	c		bool
-	i		bool
-	v		bool
-	F		bool
-	n 		bool
-	word	string
-	files	[]string
+type argFlag struct {
+	A     int
+	B     int
+	C     int
+	c     bool
+	i     bool
+	v     bool
+	F     bool
+	n     bool
+	word  string
+	files []string
 }
 
 func isDigit(c rune) bool {
@@ -53,10 +53,10 @@ func parseFlags() argFlag {
 			}
 			if strings.Contains(os.Args[i], "A") {
 				ind := strings.Index(os.Args[i], "A")
-				if len(os.Args[i]) < 3 || !isDigit(rune(os.Args[i][ind + 1])) {
+				if len(os.Args[i]) < 3 || !isDigit(rune(os.Args[i][ind+1])) {
 					err := fmt.Errorf("UNKNOW FLAG")
 					fmt.Println(err)
-					
+
 				} else {
 					flags.A, _ = strconv.Atoi(os.Args[i][2:])
 				}
@@ -64,20 +64,20 @@ func parseFlags() argFlag {
 			}
 			if strings.Contains(os.Args[i], "B") {
 				ind := strings.Index(os.Args[i], "B")
-				if len(os.Args[i]) < 3 || !isDigit(rune(os.Args[i][ind + 1])) {
+				if len(os.Args[i]) < 3 || !isDigit(rune(os.Args[i][ind+1])) {
 					err := fmt.Errorf("UNKNOW FLAG")
 					fmt.Println(err)
-					
+
 				} else {
 					flags.B, _ = strconv.Atoi(os.Args[i][2:])
 				}
 			}
 			if strings.Contains(os.Args[i], "C") {
 				ind := strings.Index(os.Args[i], "C")
-				if len(os.Args[i]) < 3 || !isDigit(rune(os.Args[i][ind + 1])) {
+				if len(os.Args[i]) < 3 || !isDigit(rune(os.Args[i][ind+1])) {
 					err := fmt.Errorf("UNKNOW FLAG")
 					fmt.Println(err)
-					
+
 				} else {
 					flags.C, _ = strconv.Atoi(os.Args[i][2:])
 					flags.A = flags.C
@@ -90,7 +90,7 @@ func parseFlags() argFlag {
 		} else {
 			flags.files = append(flags.files, os.Args[i])
 		}
-		
+
 	}
 	if len(os.Args) == 1 {
 		err := fmt.Errorf("Нет аргументов")
@@ -100,7 +100,7 @@ func parseFlags() argFlag {
 }
 
 //CreateArray of strings from files
-func createArr(arg argFlag) [][]string{
+func createArr(arg argFlag) [][]string {
 	strs := make([][]string, 0, 0)
 	if len(arg.files) == 0 {
 		sc := bufio.NewScanner(os.Stdin)
@@ -117,7 +117,7 @@ func createArr(arg argFlag) [][]string{
 		}
 	} else {
 		for i := range arg.files {
-			file,  errOpen := os.Open(arg.files[i])
+			file, errOpen := os.Open(arg.files[i])
 			if errOpen != nil {
 				fmt.Println("Error of open", arg.files[i])
 				os.Exit(0)
@@ -131,11 +131,11 @@ func createArr(arg argFlag) [][]string{
 				} else if errRead == io.EOF {
 					j = 2
 					if s != "\n" {
-						
+
 						s2 = strings.Split(s, " ")
 					}
 				} else {
-					s = s[0:len(s) - 1]
+					s = s[0 : len(s)-1]
 					s2 = strings.Split(s, " ")
 				}
 				ss := make([]string, 0, 0)
@@ -148,25 +148,42 @@ func createArr(arg argFlag) [][]string{
 			file.Close()
 		}
 	}
-	
-	return strs
+	ss := strs
+	for i := range ss {
+		tmp := make([]string, 0, 0)
+		tmp = append(tmp, ss[i][1:]...)
+		ss[i] = append(ss[i][:1], strconv.Itoa(i + 1))
+		ss[i] = append(ss[i], tmp...)
+	}
+	return ss
 }
 
 func arrContain(ss []string, arg argFlag) bool {
-	for i := 1; i < len(ss); i++ {
-		if strings.Contains(ss[i], arg.word) {
-			return true
+	match := false
+	if arg.F {
+		s := ""
+		if len(ss) > 2 {
+			s = strings.Join(ss[2:], "")
+		}
+		match = (s == arg.word)
+	} else {
+		for i := 2; i < len(ss); i++ {
+			if strings.Contains(ss[i], arg.word) {
+				match = true
+			}
 		}
 	}
-	return false
+	
+	return match
 }
 
 func reArray(ss0 [][]string, arg argFlag) [][]string {
 	ss := make([][]string, 0, 0)
 	ss2 := make([][]string, 0, 0)
 	var status string = "clean"
-	
 	ss = append(ss, ss0...)
+
+	
 	for i := range ss {
 		match := arrContain(ss[i], arg)
 		if match {
@@ -176,13 +193,12 @@ func reArray(ss0 [][]string, arg argFlag) [][]string {
 			}
 			ss2 = append(ss2, ss[i])
 			status = "major"
-			
-			
+
 			match2 := false
-			
-			for k := 1; !match2 && k <= arg.B && i - k >= 0; k++ {
-				for l := 1; l < len(ss[i - k]); l++ {
-					if strings.Contains(ss[i - k][l], arg.word) {
+
+			for k := 1; !match2 && k <= arg.B && i-k >= 0; k++ {
+				for l := 2; l < len(ss[i-k]); l++ {
+					if strings.Contains(ss[i-k][l], arg.word) {
 
 						match2 = true
 						break
@@ -190,8 +206,8 @@ func reArray(ss0 [][]string, arg argFlag) [][]string {
 				}
 				if !match2 {
 					s := [][]string{}
-					s = append(s, ss2[len(ss2) - k: ]...)
-					ss2 = append(ss2[0: len(ss2) - k], ss[i - k])
+					s = append(s, ss2[len(ss2)-k:]...)
+					ss2 = append(ss2[0:len(ss2)-k], ss[i-k])
 					ss2 = append(ss2, s...)
 					if k == arg.A {
 						status = "minor+"
@@ -201,18 +217,18 @@ func reArray(ss0 [][]string, arg argFlag) [][]string {
 				}
 			}
 			match2 = false
-			for k := 1; !match2 && k <= arg.A && k + i < len(ss); k++ {
-				
-				for l := 1; l < len(ss[i + k]); l++ {
-					if strings.Contains(ss[i + k][l], arg.word) {
+			for k := 1; !match2 && k <= arg.A && k+i < len(ss); k++ {
+
+				for l := 2; l < len(ss[i+k]); l++ {
+					if strings.Contains(ss[i+k][l], arg.word) {
 
 						match2 = true
 						break
 					}
 				}
 				if !match2 {
-					ss2 = append(ss2, ss[i + k])
-					
+					ss2 = append(ss2, ss[i+k])
+
 					if k == arg.A {
 						status = "minor+"
 					} else {
@@ -220,46 +236,47 @@ func reArray(ss0 [][]string, arg argFlag) [][]string {
 					}
 				}
 			}
-			
+
 		}
-		
+
 	}
 	return ss2
 }
 
 func reArrayV(ss0 [][]string, arg argFlag) [][]string {
 	ss := make([][]string, 0, 0)
-	
+
 	ss = append(ss, ss0...)
+	
 	for i := 0; i < len(ss); i++ {
 		match := arrContain(ss[i], arg)
 		if match {
-			if i == len(ss) - 1 {
-
+			if i == len(ss)-1 {
+				ss = ss[:i]
 			} else {
-				ss = append(ss[:i], ss[i + 1:]...)
+				ss = append(ss[:i], ss[i+1:]...)
 			}
-			
+
 		}
 	}
 	return ss
 }
 
-
 func outputStrings(strs [][]string, arg argFlag) {
-		
-	fmt.Println("len(strs)", len(strs))
 	for i := range strs {
-		for j := range strs[i] {
-			if j != 0 {
-				fmt.Print(strs[i][j], " ")
+		if arg.n {
+			fmt.Printf("%v:%v\n", strs[i][1], strings.Join(strs[i][2:], ""))
+		} else {
+			for j := range strs[i] {
+				if j > 1 {
+					fmt.Print(strs[i][j], " ")
+				}
+				
 			}
+			fmt.Println()
 		}
-		fmt.Println()
 	}
 }
-
-
 
 func main() {
 	if len(os.Args) < 3 {
@@ -267,7 +284,6 @@ func main() {
 		return
 	}
 	arg := parseFlags()
-	fmt.Println(arg)
 	strs := createArr(arg)
 	strs2 := [][]string{}
 	if arg.i {
@@ -278,22 +294,14 @@ func main() {
 			}
 		}
 	}
-	
 	if !arg.v {
 		strs2 = reArray(strs, arg)
 	} else {
 		strs2 = reArrayV(strs, arg)
 	}
 	if arg.c {
-		cnt := 0
-		for i := range strs {
-			if arrContain(strs[i], arg) {
-				cnt++
-			}
-		}
-		fmt.Println(cnt)
+		fmt.Println(len(strs2))
 	} else {
 		outputStrings(strs2, arg)
 	}
-	
 }
