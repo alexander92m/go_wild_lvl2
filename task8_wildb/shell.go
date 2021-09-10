@@ -4,44 +4,56 @@ import (
 	"bufio"
 	"fmt"
 	"os"
+	"strings"
 )
 
 type Command struct {
-    Name string
+	Name string
+
 }
 
 type Status struct {
-    Dir string
+	Dir string
 
 }
 
-func parseDir(com Command) {
-    
+//parseStatus выясняет переменные для текущего каталога
+func parseStatus(stat Status) {
+	
 }
 
-func parseCmd(input string) {
-    if input == "ls" {
-        var cmd Command
-        cmd.Name = "ls"
-    }
+//parseCmd выясняет какая команда введена
+func parseCmd(input string, cmd *Command) {
+	if input == "cd" {
+		cmd.Name = "cd"
+	} else if input == "pwd" {
+		cmd.Name = "pwd"
+	} else if input == "echo" {
+		cmd.Name = "echo"
+	} else if input == "kill" {
+		cmd.Name = "kill"
+	} else if input == "ps" {
+		cmd.Name = "ps"
+	} else {
+		cmd.Name = "error, unknown command"
+	}
 }
 
 func main() {
-    var stat Status
-    reader := bufio.NewReader(os.Stdin)
-    for {
-        
-        
-        input, err := reader.ReadString('\n')
-        if err != nil {
-            fmt.Fprintln(os.Stderr, err)
-            break
-        }
+	var stat Status
+	var cmd Command
+	reader := bufio.NewReader(os.Stdin)
+	for {
+		cmd.Name = ""
+		input, err := reader.ReadString('\n')
+		if err != nil {
+			fmt.Fprintln(os.Stderr, err)
+			break
+		}
+		input = input[:strings.Index(input, "\n")]
 
-        com := parseCmd(input)
-        parseStatus(stat)
-
-		fmt.Printf("input=%v, err=%v T=%T\n", input, err, err)
-        
-    }
+		parseCmd(input, &cmd)
+		parseStatus(stat)
+		fmt.Printf("input=%v, &cmd=%p, cmd=%v, stat=%v\n", input, &cmd, cmd, stat)
+	}
 }
