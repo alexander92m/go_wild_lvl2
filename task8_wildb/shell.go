@@ -3,7 +3,9 @@ package main
 import (
 	"bufio"
 	"fmt"
+	// "log"
 	"os"
+	"os/exec"
 	"strings"
 )
 
@@ -23,37 +25,60 @@ func parseStatus(stat Status) {
 }
 
 //parseCmd выясняет какая команда введена
-func parseCmd(input string, cmd *Command) {
-	if input == "cd" {
+func parseCmd(input string) Command {
+	var cmd Command
+	inputArr := strings.Split(input, " ")
+	if inputArr[0] == "cd" {
 		cmd.Name = "cd"
-	} else if input == "pwd" {
+	} else if inputArr[0] == "pwd" {
 		cmd.Name = "pwd"
-	} else if input == "echo" {
+	} else if inputArr[0] == "echo" {
 		cmd.Name = "echo"
-	} else if input == "kill" {
+	} else if inputArr[0] == "kill" {
 		cmd.Name = "kill"
-	} else if input == "ps" {
+	} else if inputArr[0] == "ps" {
 		cmd.Name = "ps"
+	} else if inputArr[0] == "cat" {
+		cmd.Name = "cat"
+	} else if inputArr[0] == "" {
+		cmd.Name = ""
 	} else {
 		cmd.Name = "error, unknown command"
 	}
+	return cmd
 }
 
 func main() {
-	var stat Status
-	var cmd Command
 	reader := bufio.NewReader(os.Stdin)
 	for {
-		cmd.Name = ""
+		s, _ := os.Hostname()
+
+		s = strings.Split(s, ".")[0]
+		fmt.Printf("%v%% ", s)
 		input, err := reader.ReadString('\n')
 		if err != nil {
 			fmt.Fprintln(os.Stderr, err)
 			break
 		}
 		input = input[:strings.Index(input, "\n")]
-
-		parseCmd(input, &cmd)
-		parseStatus(stat)
-		fmt.Printf("input=%v, &cmd=%p, cmd=%v, stat=%v\n", input, &cmd, cmd, stat)
+		cmd := parseCmd(input)
+		
+		if cmd.Name == "" {
+			
+		} else {
+			out, err := exec.Command(cmd.Name).Output()
+			if err != nil {
+				fmt.Fprintln(os.Stderr, err)
+			}
+			fmt.Print(string(out))
+			
+			// cmd1 := exec.Command(cmd.Name)
+			
+			// err := cmd1.Run()
+		
+			// if err != nil {
+			// 	log.Println(err)
+			// }
+		}
 	}
 }
