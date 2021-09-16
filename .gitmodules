@@ -1,0 +1,3 @@
+[submodule "task1_wildb"]
+	path = task1_wildb
+	url = https://github.com/alexander92m/task1_wildb.git
