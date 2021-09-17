@@ -33,9 +33,12 @@ func checker(s string) error{
 // "a4bc2d5e" => "aaaabccddddde"
 func Unpack(s string) (string, error) {
 	fmt.Println("")
+	if s == "" {
+		return "", nil
+	}
 	err := checker(s)
 	if err != nil {
-		return s, nil
+		return "", err
 	}
 
 	s2 := []rune(s)
@@ -43,18 +46,20 @@ func Unpack(s string) (string, error) {
 	s3 := make([]rune, 0)
 	for i := 0; i < len(s2); i++ {
 		if isSlash(s2[i]) {	
-			if isSlash(s2[i + 1]) {
+			if isSlash(s2[i + 1]) || isDigit(s2[i + 1]) {
 				s3 = append(s3, s2[i + 1])
-			}
-			if i + 2 < len(s2) {
-				if isDigit(s2[i + 2]) {
+				if i + 2 < len(s2) && isDigit(s2[i + 2]) {
 					temp = int(s2[i + 2] - rune(48))
 					for j := 1; j < temp; j++ {
 						s3 = append(s3, s2[i + 1])					
 					}
-					i = i + 2
+					i++
+					i++
+				} else {
+					i++
 				}
 			}
+			
 		} else if isDigit(s2[i]) {
 			temp = int(s2[i] - rune(48))
 			for j := 1; j < temp; j++ {
