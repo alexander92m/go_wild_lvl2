@@ -2,9 +2,13 @@ package main
 
 import (
 	"fmt"
+	"errors"
 )
+
+
 //проверка на число
 func isDigit(c rune) bool {
+	
 	if c >= '0' && c <= '9' {
 		return true
 	}
@@ -19,6 +23,10 @@ func isSlash(c rune) bool {
 }
 //проверка на ошибку
 func checker(s string) error{
+	err := errors.New("некорректная строка")
+	if isDigit(rune(s[0])) {
+		return err
+	}
 	return nil
 }
 
