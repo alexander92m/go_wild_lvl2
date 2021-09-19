@@ -16,13 +16,17 @@ func TestAnagramgs(t *testing.T) {
 			in: []string{"стол", "слот", "стул"},
 			out: map[string][]string{"стол": []string{"стол", "слот"}},
 		},
-		// tester{
-		// 	[]string{"пятак", "пятка", "тяпка", "листок", "слиток", "столик"},
-		// 	map[string][]string{"пятак": []string{"пятак", "пятка", "тяпка"}, "листок": []string{"листок", "слиток", "столик"}},
-		// },
+		tester{
+			in: []string{"пятак", "пятка", "тяпка"},
+			out: map[string][]string{"пятак": []string{"пятак", "пятка", "тяпка"}},
+		},
+		tester{
+			in: []string{"листок", "слиток", "столик"},
+			out: map[string][]string{"листок": []string{"листок", "слиток", "столик"}},
+		},
 		
 	}
-	// fmt.Println(tes[0].out["стол"])
+
 	for i := range tes {
 		got := Anagrams(tes[i].in)
 		for j := range got {

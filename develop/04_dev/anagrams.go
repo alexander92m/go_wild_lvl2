@@ -4,6 +4,7 @@ import (
 	"strings"
 )
 
+//CreateRunesArr создать масиив 2мерный рун вместо массива строк
 func CreateRunesArr(s0 []string) [][]rune {
 	ss := make([][]rune, 0, 0)
 	for i := range s0 {

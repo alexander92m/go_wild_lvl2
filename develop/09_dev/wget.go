@@ -12,8 +12,9 @@ const (
     bufSize   = 1024 * 8
 )
 
-//Write results of a GET request to file. If a fileName is given an empty string then the 
-//last chunk of the input url is used as a filename. Eg: http://foo/baz.jar => baz.jar
+//запись запроса GET в файл. Если имя файла задано пустой строкой,
+//  то в качестве имени файла используется //последний фрагмент входного URL-адреса.
+//   Eg: http://foo/baz.jar => baz.jar
 func Wget(url, fileName string) {
     resp := getResponse(url)
     if fileName == "" {
@@ -24,7 +25,7 @@ func Wget(url, fileName string) {
 }
 
 
-// Make the GET request to a url, return the response
+// делается запрос GET возвращается ответ
 func getResponse(url string) *http.Response {
     tr := new(http.Transport)
     client := &http.Client{Transport: tr}
@@ -34,9 +35,8 @@ func getResponse(url string) *http.Response {
 }
 
 
-// Write the response of the GET request to file
+// запись овтета GET  файл
 func writeToFile(fileName string, resp *http.Response) {
-    // Credit for this implementation should go to github user billnapier
     file, err := os.OpenFile(fileName, os.O_CREATE|os.O_WRONLY, 0777)
     errorChecker(err)
     defer file.Close()
@@ -46,7 +46,7 @@ func writeToFile(fileName string, resp *http.Response) {
     errorChecker(err)
 }
 
-// Check if we received an error on our last function call
+// проверка на ошибку и паника
 func errorChecker(err error) {
     if err != nil {
         panic(err)
@@ -54,11 +54,9 @@ func errorChecker(err error) {
 }
 
 func main() {
-
 	if len(os.Args) == 3 {
 		Wget(os.Args[1], os.Args[2])
 	} else if len(os.Args) == 2 {
 		Wget(os.Args[1], "")
 	}
-	
 }
