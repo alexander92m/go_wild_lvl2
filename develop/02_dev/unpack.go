@@ -30,7 +30,7 @@ func checker(s string) error{
 	return nil
 }
 
-// "a4bc2d5e" => "aaaabccddddde"
+// распаковка
 func Unpack(s string) (string, error) {
 	fmt.Println("")
 	if s == "" {
