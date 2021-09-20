@@ -90,8 +90,9 @@ func (h *Handler) ServeHTTP(w http.ResponseWriter, req *http.Request) {
 	day, _ := strconv.Atoi(req.FormValue("day"))
 	month, _ := strconv.Atoi(req.FormValue("month"))
 	year, _ := strconv.Atoi(req.FormValue("year"))
-	fmt.Println(req.URL.Path, "PRIVET|", req.URL.ForceQuery, "|", req.URL.RawQuery[:len(req.URL.RawQuery) - 1])
-	if _, err := time.Parse("2006/1/2", evv); err != nil && req.URL.Path != "/events_for_month" {
+	fmt.Println(day, month, year, evv, eventT)
+	fmt.Println(req.URL.Path, "PRIVET|", req.URL.ForceQuery, "|", req.URL.RawQuery)
+	if _, err := time.Parse("2006-01-02", evv); err != nil && req.URL.Path != "/events_for_month" {
 		w.WriteHeader(400)
 		return
 	}
