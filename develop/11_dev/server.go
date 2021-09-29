@@ -4,11 +4,13 @@ import (
 	"encoding/json"
 	"fmt"
 	"log"
-	"strconv"
-	"github.com/joho/godotenv"
 	"net/http"
 	"os"
+	"strconv"
+	"strings"
 	"time"
+
+	"github.com/joho/godotenv"
 )
 
 type event struct {
@@ -17,22 +19,33 @@ type event struct {
 	Year  int
 	Event string
 }
+
 type output struct {
 	Result []event `json:"result,omitempty"`
 }
+
 type outputDay struct {
 	ResultDay event `json:"result,omitempty"`
 }
+
 type resultAndError struct {
 	Result string `json:"result,omitempty"`
 	Err    string `json:"error,omitempty"`
 }
+
 type repo struct {
 	myMap    map[string]string
 	arrayDay []string
 }
 
-
+func makeJSON(w http.ResponseWriter, i interface{}) {
+	jSon, err := json.Marshal(i)
+	if err != nil {
+		w.WriteHeader(500)
+		return
+	}
+	_, _ = w.Write(jSon)
+}
 
 type repository interface {
 	create(w http.ResponseWriter, evv string, eventT string)
@@ -47,59 +60,23 @@ type Handler struct {
 	r repository
 }
 
-func main() {
-	port := parseConfig("Port")
-	repo := NewRepo()
-	handler := &Handler{r: repo}
-	fmt.Println("Start server!!!")
-	log.Fatal(http.ListenAndServe(port, handler))
-
-}
-//аргументы из конфига
-func parseConfig(value string) string {
-	if err := godotenv.Load(); err != nil {
-		fmt.Println("error", err)
-	}
-	return os.Getenv(value)
-}
-//создается указатель на хранилище
-func NewRepo() *repo {
-	return &repo{
-		myMap: make(map[string]string),
-		arrayDay: []string{"1", "2", "3", "4", "5", "6", "7", "8", "9", "10", "11", "12", "13", "14",
-			"15", "16", "17", "18", "19", "20", "21", "22", "23", "24", "25", "26", "27", "28", "29", "30", "31"},
-	}
-
-}
-
-func makeJSON(w http.ResponseWriter, i interface{}) {
-	jSon, err := json.Marshal(i)
-	if err != nil {
-		w.WriteHeader(500)
-		return
-	}
-	_, _ = w.Write(jSon)
-}
-
 func (h *Handler) ServeHTTP(w http.ResponseWriter, req *http.Request) {
 	goodRequestBool := true
 	var evv string
 	start := time.Now()
 	eventT := req.FormValue("event")
-	evv = req.FormValue("year") + "/" + req.FormValue("month") + "/" + req.FormValue("day")
-	day, _ := strconv.Atoi(req.FormValue("day"))
-	month, _ := strconv.Atoi(req.FormValue("month"))
-	year, _ := strconv.Atoi(req.FormValue("year"))
-	fmt.Println(day, month, year, evv, eventT)
-	fmt.Println(req.URL.Path, "PRIVET|", req.URL.ForceQuery, "|", req.URL.RawQuery)
-	if _, err := time.Parse("2006-01-02", evv); err != nil && req.URL.Path != "/events_for_month" {
+	evv = req.FormValue("date")
+	day, _ := strconv.Atoi(req.FormValue("date")[8:10])
+	month, _ := strconv.Atoi(req.FormValue("date")[5:7])
+	year, _ := strconv.Atoi(req.FormValue("date")[:4])
+	if _, err := time.Parse("2006-1-2", evv); err != nil && req.URL.Path != "/events_for_month" {
 		w.WriteHeader(400)
 		return
 	}
-	fmt.Println(req.URL.Path, "PRIVET2|", req.URL.ForceQuery, "|", req.URL.RawQuery[:len(req.URL.RawQuery) - 1])
+	strings.ReplaceAll(evv, "-", "/")
+	fmt.Println(req.URL.Path)
 	switch req.URL.Path {
 	case "/create_event":
-		fmt.Println(req.URL.Path, "PRIVET3|", req.URL.ForceQuery, "|", req.URL.RawQuery[:len(req.URL.RawQuery) - 1])
 		if req.Method != http.MethodPost {
 			w.WriteHeader(405)
 			return
@@ -148,9 +125,20 @@ func (h *Handler) ServeHTTP(w http.ResponseWriter, req *http.Request) {
 	}
 }
 
+func parseConfig(value string) string {
+	if err := godotenv.Load(); err != nil {
+		fmt.Println("error", err)
+	}
+	return os.Getenv(value)
+}
+func NewRepo() *repo {
+	return &repo{
+		myMap: make(map[string]string),
+		arrayDay: []string{"1", "2", "3", "4", "5", "6", "7", "8", "9", "10", "11", "12", "13", "14",
+			"15", "16", "17", "18", "19", "20", "21", "22", "23", "24", "25", "26", "27", "28", "29", "30", "31"},
+	}
 
-
-
+}
 func (r *repo) create(w http.ResponseWriter, evv string, eventT string) {
 	r.myMap[evv] = eventT
 	result := resultAndError{Result: "Событие создано успешно!"}
@@ -192,7 +180,15 @@ func (r *repo) getForDay(w http.ResponseWriter, evv string, day, month, year int
 func (r *repo) getForMonth(w http.ResponseWriter, month, year int) {
 	var events []event
 	for _, vvv := range r.arrayDay {
-		value, ok := r.myMap[fmt.Sprintf("%d/%d/%s", year, month, vvv)]
+		if len(vvv) < 2 {
+			vvv = "0" + vvv
+		}
+		m := strconv.Itoa(month)
+		if len(m) < 2 {
+			m = "0" + m
+		}
+		fmt.Printf("%d-%d-%s\n", year, month, vvv)
+		value, ok := r.myMap[fmt.Sprintf("%d-%v-%v", year, m, vvv)]
 		vv, _ := strconv.Atoi(vvv)
 		if ok {
 			newEvent := event{Day: vv, Month: month, Year: year, Event: value}
@@ -207,9 +203,27 @@ func (r *repo) getForMonth(w http.ResponseWriter, month, year int) {
 	NewOutput := output{Result: events}
 	makeJSON(w, NewOutput)
 }
+
+//month_day() фикс для приведения к нормальному формату
+func month_day(time1 time.Time) (string, string){
+	month	:= ""
+	day 	:= ""
+	if int(time1.Month()) < 10 {
+		month = "0"+ strconv.Itoa(int(time1.Month()))
+	} else {
+		month = strconv.Itoa(int(time1.Month()))
+	}
+	if int(time1.Day()) < 10 {
+		day = "0"+ strconv.Itoa(int(time1.Day()))
+	} else {
+		day = strconv.Itoa(int(time1.Day()))
+	}
+	return month, day
+}
+
 func (r *repo) getForWeek(w http.ResponseWriter, evv string) {
 	var events []event
-	layout := "2006/1/2"
+	layout := "2006-1-2"
 	t, err := time.Parse(layout, evv)
 	if err != nil {
 		fmt.Printf("%v", err)
@@ -220,7 +234,9 @@ func (r *repo) getForWeek(w http.ResponseWriter, evv string) {
 	}
 	for i := 1 - nDay; i <= 7-nDay; i++ {
 		time1 := t.AddDate(0, 0, i)
-		value, ok := r.myMap[fmt.Sprintf("%d/%d/%d", time1.Year(), time1.Month(), time1.Day())]
+		y := time1.Year()
+		m, d := month_day(time1)
+		value, ok := r.myMap[fmt.Sprintf("%d-%v-%v", y, m, d)]
 		if ok {
 			newEvent := event{Day: time1.Day(), Month: int(time1.Month()), Year: time1.Year(), Event: value}
 			events = append(events, newEvent)
@@ -229,9 +245,18 @@ func (r *repo) getForWeek(w http.ResponseWriter, evv string) {
 	if len(events) == 0 {
 		result := resultAndError{Err: "Значение не найдено!"}
 		makeJSON(w, result)
-		return
+	} else {
+		NewOutput := output{Result: events}
+		makeJSON(w, NewOutput)
+
 	}
-	NewOutput := output{Result: events}
-	makeJSON(w, NewOutput)
+}
+
+func main() {
+	port := parseConfig("Port")
+	repo := NewRepo()
+	handler := &Handler{r: repo}
+	fmt.Println("Start server!!!")
+	log.Fatal(http.ListenAndServe(port, handler))
 
 }

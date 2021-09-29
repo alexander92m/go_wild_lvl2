@@ -1,5 +1,8 @@
-module 11_dev_server
+module 11dev
 
-go 1.16
+go 1.17
 
-require github.com/joho/godotenv v1.3.0
+require (
+	github.com/gorilla/mux v1.8.0 // indirect
+	github.com/joho/godotenv v1.4.0 // indirect
+)
